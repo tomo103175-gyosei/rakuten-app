@@ -141,6 +141,7 @@ def search_rakuten(keyword, hits=5):
     url = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601"
     params = {
         "applicationId": RAKUTEN_APP_ID,
+        "accessKey": RAKUTEN_ACCESS_KEY,
         "keyword": keyword,
         "format": "json",
         "hits": hits,
