@@ -166,10 +166,6 @@ def search_rakuten(keyword, hits=5):
         if response.status_code != 200:
             error_msg = data.get('error_description', data.get('error', 'Unknown Error'))
             st.error(f"楽天APIエラー ({response.status_code}): {error_msg}")
-            
-            with st.expander("詳細なデバッグ情報"):
-                st.write("Response:", data)
-                st.write("URL:", url)
             return []
         
         return data.get("Items", [])
