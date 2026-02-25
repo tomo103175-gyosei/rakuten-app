@@ -149,15 +149,16 @@ def search_rakuten(keyword, hits=5):
     
     try:
         response = requests.get(url, params=params)
+        data = response.json()
+        
         if response.status_code != 200:
-            st.error(f"楽天APIエラー: {response.status_code}")
+            error_msg = data.get('error_description', data.get('error', 'Unknown Error'))
+            st.error(f"楽天APIエラー ({response.status_code}): {error_msg}")
+            # デバッグ用にパラメータ状態を表示（IDは伏せる）
+            if not RAKUTEN_APP_ID:
+                st.warning("RAKUTEN_APP_ID が空です。Secretsの設定を確認してください。")
             return []
         
-        data = response.json()
-        if "error" in data:
-            st.error(f"楽天APIエラー: {data.get('error_description', data['error'])}")
-            return []
-            
         return data.get("Items", [])
     except Exception as e:
         st.error(f"接続エラー: {e}")
