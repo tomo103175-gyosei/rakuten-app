@@ -149,8 +149,11 @@ def search_rakuten(keyword, hits=5):
     }
     
     # ブラウザからのアクセスを装い、Referer で許可ドメインを伝える
+    # 綴りやヘッダーの種類に厳しい場合があるため、複数のパターンをセットします
     headers = {
         "Referer": "https://rakuten-room.streamlit.app",
+        "Referrer": "https://rakuten-room.streamlit.app",
+        "Origin": "https://rakuten-room.streamlit.app",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     if RAKUTEN_ACCESS_KEY:
