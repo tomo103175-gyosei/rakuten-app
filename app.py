@@ -131,14 +131,14 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
-# --- 楽天検索関数 (IP制限のないv2版を使用) ---
+# --- 楽天検索関数 (IP制限のないv2ドメイン + 最新版を使用) ---
 def search_rakuten(keyword, hits=5):
     if not RAKUTEN_APP_ID:
         st.error("環境変数 RAKUTEN_APP_ID が見つかりません。")
         return []
     
-    # より柔軟な v2 エンドポイントを使用
-    url = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170426"
+    # 標準ドメイン(app.rakuten.co.jp)で最新の 20220601 バージョンを指定
+    url = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601"
     params = {
         "applicationId": RAKUTEN_APP_ID,
         "keyword": keyword,
