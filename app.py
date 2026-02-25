@@ -154,9 +154,13 @@ def search_rakuten(keyword, hits=5):
         if response.status_code != 200:
             error_msg = data.get('error_description', data.get('error', 'Unknown Error'))
             st.error(f"楽天APIエラー ({response.status_code}): {error_msg}")
-            # デバッグ用にパラメータ状態を表示（IDは伏せる）
-            if not RAKUTEN_APP_ID:
-                st.warning("RAKUTEN_APP_ID が空です。Secretsの設定を確認してください。")
+            
+            # 生のレスポンスを表示して原因を追求
+            with st.expander("詳細なデバッグ情報"):
+                st.write("Response JSON:", data)
+                st.write("Requested URL:", url)
+                if not RAKUTEN_APP_ID:
+                    st.warning("RAKUTEN_APP_ID が未設定です")
             return []
         
         return data.get("Items", [])
