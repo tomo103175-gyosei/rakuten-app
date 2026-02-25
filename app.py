@@ -131,34 +131,33 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
-# --- 楽天検索関数 ---
+# --- 楽天検索関数 (IP制限のないv2版を使用) ---
 def search_rakuten(keyword, hits=5):
     if not RAKUTEN_APP_ID:
         st.error("環境変数 RAKUTEN_APP_ID が見つかりません。")
         return []
-    url = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601"
+    
+    # より柔軟な v2 エンドポイントを使用
+    url = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170426"
     params = {
         "applicationId": RAKUTEN_APP_ID,
-        "accessKey": RAKUTEN_ACCESS_KEY,
         "keyword": keyword,
         "format": "json",
         "hits": hits,
         "imageFlag": 1,
     }
-    headers = {"Authorization": f"Bearer {RAKUTEN_ACCESS_KEY}" if RAKUTEN_ACCESS_KEY else None}
-    headers = {k: v for k, v in headers.items() if v is not None}
+    
     try:
-        response = requests.get(url, params=params, headers=headers)
+        response = requests.get(url, params=params)
         if response.status_code != 200:
-            if response.status_code == 403:
-                st.error("楽天APIエラー: 許可されていないIPアドレスです。")
-            else:
-                st.error(f"HTTPエラー: {response.status_code}")
+            st.error(f"楽天APIエラー: {response.status_code}")
             return []
+        
         data = response.json()
         if "error" in data:
             st.error(f"楽天APIエラー: {data.get('error_description', data['error'])}")
             return []
+            
         return data.get("Items", [])
     except Exception as e:
         st.error(f"接続エラー: {e}")
