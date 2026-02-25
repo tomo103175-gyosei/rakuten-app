@@ -131,14 +131,14 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
-# --- 楽天検索関数 (IP制限のないv2ドメイン + 最新版を使用) ---
+# --- 楽天検索関数 (OpenAPI + Referer認証を使用) ---
 def search_rakuten(keyword, hits=5):
     if not RAKUTEN_APP_ID:
         st.error("環境変数 RAKUTEN_APP_ID が見つかりません。")
         return []
     
-    # 標準ドメイン(app.rakuten.co.jp)で最新の 20220601 バージョンを指定
-    url = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601"
+    # OpenAPI エンドポイントに戻し、Referer でドメイン認証を行う
+    url = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601"
     params = {
         "applicationId": RAKUTEN_APP_ID,
         "keyword": keyword,
@@ -147,20 +147,25 @@ def search_rakuten(keyword, hits=5):
         "imageFlag": 1,
     }
     
+    # ブラウザからのアクセスを装い、Referer で許可ドメインを伝える
+    headers = {
+        "Referer": "https://rakuten-room.streamlit.app",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    if RAKUTEN_ACCESS_KEY:
+        headers["Authorization"] = f"Bearer {RAKUTEN_ACCESS_KEY}"
+
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, headers=headers)
         data = response.json()
         
         if response.status_code != 200:
             error_msg = data.get('error_description', data.get('error', 'Unknown Error'))
             st.error(f"楽天APIエラー ({response.status_code}): {error_msg}")
             
-            # 生のレスポンスを表示して原因を追求
             with st.expander("詳細なデバッグ情報"):
-                st.write("Response JSON:", data)
-                st.write("Requested URL:", url)
-                if not RAKUTEN_APP_ID:
-                    st.warning("RAKUTEN_APP_ID が未設定です")
+                st.write("Response:", data)
+                st.write("URL:", url)
             return []
         
         return data.get("Items", [])
